@@ -1,0 +1,10 @@
+{
+    "defaultServer": "friendly-greeter",
+    "servers": {
+        "friendly-greeter": {
+            "command": "node",
+            "args": ["index.js"],
+            "transport": "stdio"
+        }
+    }
+}
