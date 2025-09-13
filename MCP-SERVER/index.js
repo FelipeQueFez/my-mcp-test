@@ -1,6 +1,7 @@
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
+import axios from 'axios';
 
 // Create an MCP server
 const server = new McpServer({
@@ -68,6 +69,36 @@ server.registerTool(
                 text: greetings[language]
             }]
         };
+    }
+);
+
+server.registerTool(
+    "chat_with_gpt",
+    {
+        title: "Chat with GPT",
+        description: "Sends a prompt to the NestJS API and gets a response from ChatGPT.",
+        inputSchema: {
+            prompt: z.string().describe("The prompt to send to ChatGPT.")
+        }
+    },
+    async ({ prompt }) => {
+        try {
+            const response = await axios.post('http://localhost:3000/chatgpt/completions', { prompt });
+            return {
+                content: [{
+                    type: "text",
+                    text: response.data
+                }]
+            };
+        } catch (error) {
+            console.error('Error communicating with NestJS API:', error);
+            return {
+                content: [{
+                    type: "text",
+                    text: "Sorry, I couldn't connect to the chat service."
+                }]
+            };
+        }
     }
 );
 
