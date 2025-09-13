@@ -1,12 +1,32 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { ChatgptService } from './chatgpt.service';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ChatCompletionResponseDto,
+  CreateChatCompletionDto,
+} from './dto/chat-completion.dto';
+// import { CreateChatCompletionDto, ChatCompletionResponseDto } from './dto/chat-completion.dto';
 
+@ApiTags('ChatGPT')
 @Controller('chatgpt')
 export class ChatgptController {
   constructor(private readonly chatgptService: ChatgptService) {}
 
   @Post('completions')
-  async createChatCompletion(@Body('prompt') prompt: string) {
-    return this.chatgptService.createChatCompletion(prompt);
+  @ApiOperation({
+    summary: 'Create a chat completion',
+    description: 'Sends a prompt to ChatGPT and receives a response',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The chat completion response',
+    type: ChatCompletionResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  async createChatCompletion(
+    @Body() dto: CreateChatCompletionDto,
+  ): Promise<ChatCompletionResponseDto> {
+    const content = await this.chatgptService.createChatCompletion(dto.prompt);
+    return { content };
   }
 }
