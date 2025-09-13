@@ -107,10 +107,30 @@ console.log(resource.contents[0].text);
    }
    ```
 
+2. Para instalar no VsCode abra o arquivo `mcp.json` via CTRL+P+>+mcp user configuration:
+  ```json
+      "friendly-greeter": {
+        "command": "node",
+        "args": [
+          "index.js"
+        ],
+        "transport": "stdio",
+        "cwd": "D:\\development\\projects\\my-mcp-test\\MCP-SERVER",
+        "type": "stdio"
+      }
+  ```
+
 3. Execute o MCP Inspector:
    ```bash
    mcp-inspector
    ```
+
+3. Executando de outra forma
+
+  ```bash
+  node index.js
+  npx @modelcontextprotocol/inspector
+  ```
 
 4. Acesse a interface web do Inspector em http://localhost:6274
 
