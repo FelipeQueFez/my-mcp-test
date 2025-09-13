@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty } from 'class-validator';
 
-export class CreateChatCompletionDto {
+export class CreateChatDto {
   @ApiProperty({
     description: 'The prompt to send to ChatGPT',
     example: 'What is the capital of France?',
@@ -11,10 +11,9 @@ export class CreateChatCompletionDto {
   prompt: string;
 }
 
-export class ChatCompletionResponseDto {
+export class ChatResponseDto {
   @ApiProperty({
     description: 'The response from ChatGPT',
-    example: 'The capital of France is Paris.',
   })
   content: string;
 }

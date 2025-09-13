@@ -11,6 +11,18 @@ export class ChatgptService {
     });
   }
 
+  // A) RECOMMENDED: Responses API (single-shot)
+  async respond(prompt: string) {
+    const res = await this.openai.responses.create({
+      model: 'gpt-4o',
+      input: prompt,
+      // optionally: instructions: 'You are a helpful assistant.'
+    });
+    // SDK convenience field with the final composed text
+    return res.output_text; // string
+  }
+
+  // B) Legacy but supported: Chat Completions API
   async createChatCompletion(prompt: string) {
     try {
       const response = await this.openai.chat.completions.create({

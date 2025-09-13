@@ -1,16 +1,28 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { ChatgptService } from './chatgpt.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import {
-  ChatCompletionResponseDto,
-  CreateChatCompletionDto,
-} from './dto/chat-completion.dto';
-// import { CreateChatCompletionDto, ChatCompletionResponseDto } from './dto/chat-completion.dto';
+import { ChatResponseDto, CreateChatDto } from './dto/chat.dto';
 
 @ApiTags('ChatGPT')
 @Controller('chatgpt')
 export class ChatgptController {
   constructor(private readonly chatgptService: ChatgptService) {}
+
+  @Post('respond')
+  @ApiOperation({
+    summary: 'Create a chat respond',
+    description: 'Sends a prompt to ChatGPT and receives a response',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The chat respond response',
+    type: ChatResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  async respond(@Body() dto: CreateChatDto): Promise<ChatResponseDto> {
+    const content = await this.chatgptService.respond(dto.prompt);
+    return { content };
+  }
 
   @Post('completions')
   @ApiOperation({
@@ -20,12 +32,12 @@ export class ChatgptController {
   @ApiResponse({
     status: 200,
     description: 'The chat completion response',
-    type: ChatCompletionResponseDto,
+    type: ChatResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Invalid input' })
   async createChatCompletion(
-    @Body() dto: CreateChatCompletionDto,
-  ): Promise<ChatCompletionResponseDto> {
+    @Body() dto: CreateChatDto,
+  ): Promise<ChatResponseDto> {
     const content = await this.chatgptService.createChatCompletion(dto.prompt);
     return { content };
   }
