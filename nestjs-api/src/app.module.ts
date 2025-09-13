@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ChatgptModule } from './chatgpt/chatgpt.module';
 
 @Module({
@@ -11,7 +9,7 @@ import { ChatgptModule } from './chatgpt/chatgpt.module';
     }),
     ChatgptModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
