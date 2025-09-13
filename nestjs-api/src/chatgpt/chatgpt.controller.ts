@@ -8,22 +8,6 @@ import { ChatResponseDto, CreateChatDto } from './dto/chat.dto';
 export class ChatgptController {
   constructor(private readonly chatgptService: ChatgptService) {}
 
-  @Post('respond')
-  @ApiOperation({
-    summary: 'Create a chat respond',
-    description: 'Sends a prompt to ChatGPT and receives a response',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'The chat respond response',
-    type: ChatResponseDto,
-  })
-  @ApiResponse({ status: 400, description: 'Invalid input' })
-  async respond(@Body() dto: CreateChatDto): Promise<ChatResponseDto> {
-    const content = await this.chatgptService.respond(dto.prompt);
-    return { content };
-  }
-
   @Post('completions')
   @ApiOperation({
     summary: 'Create a chat completion',
