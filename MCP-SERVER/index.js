@@ -84,12 +84,22 @@ server.registerTool(
     async ({ prompt }) => {
         try {
             const response = await axios.post('http://localhost:3000/chatgpt/completions', { prompt });
-            return {
-                content: [{
-                    type: "text",
-                    text: response.data
-                }]
-            };
+            // The response.data contains the content object directly
+            if (response.data && response.data.content) {
+                return {
+                    content: [{
+                        type: "text",
+                        text: response.data.content
+                    }]
+                };
+            } else {
+                return {
+                    content: [{
+                        type: "text",
+                        text: "Invalid response format from the chat service"
+                    }]
+                };
+            }
         } catch (error) {
             console.error('Error communicating with NestJS API:', error);
             return {
