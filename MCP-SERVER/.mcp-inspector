@@ -1,7 +1,7 @@
 {
-    "defaultServer": "friendly-greeter",
+    "defaultServer": "riachuelo_mcp_server",
     "servers": {
-        "friendly-greeter": {
+        "riachuelo_mcp_server": {
             "command": "node",
             "args": ["index.js"],
             "transport": "stdio"

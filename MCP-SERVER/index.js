@@ -5,7 +5,7 @@ import axios from 'axios';
 
 // Create an MCP server
 const server = new McpServer({
-    name: "friendly-greeter",
+    name: "riachuelo_mcp_server",
     version: "1.0.0"
 });
 
@@ -96,7 +96,8 @@ try {
     await server.connect(transport);
     console.error('Servidor MCP iniciado com sucesso!');
     console.error('Ferramentas disponíveis:');
-    console.error('- friendly_greeting');
+    console.error('- riachuelo_code_review');
+    console.error('- riachuelo_code_generator');
 } catch (error) {
     console.error('Erro ao iniciar o servidor:', error);
     process.exit(1);
