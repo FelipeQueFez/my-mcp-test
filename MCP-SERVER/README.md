@@ -1,194 +1,93 @@
-# MCP Server - Friendly Greeter
+# Servidor MCP e API NestJS - Integração Riachuelo
 
-Este é um servidor MCP (Model Context Protocol) que implementa um serviço de saudações amigáveis em múltiplos idiomas. O servidor foi desenvolvido usando o SDK TypeScript do MCP e oferece tanto ferramentas quanto recursos.
+Este projeto demonstra a integração entre um servidor **MCP (Model Context Protocol)** e uma **API NestJS**, oferecendo ferramentas para revisão e geração de código através de um serviço customizado chamado "Riachuelo".
 
-## Funcionalidades
+## Visão Geral da Arquitetura
 
-### 1. Ferramenta de Saudação (`friendly_greeting`)
+O projeto é dividido em duas partes principais:
 
-Uma ferramenta que gera saudações personalizadas com as seguintes características:
+1.  **`MCP-SERVER/`**: Um servidor que implementa o Model Context Protocol. Ele atua como um gateway, expondo ferramentas que se comunicam com a API NestJS para executar tarefas complexas.
+2.  **`nestjs-api/`**: Uma API web construída com o framework NestJS, que contém a lógica de negócio para interagir com os serviços de código (como o `chatgpt/completions` e `chatgpt/code-generation`).
 
-- **Nome**: `friendly_greeting`
-- **Descrição**: Retorna uma saudação amigável com data e hora atual
-- **Parâmetros**:
-  - `name` (obrigatório): Nome da pessoa para cumprimentar
-  - `language` (opcional): Idioma da saudação (padrão: "pt")
-    - Opções: "pt" (Português), "en" (Inglês), "es" (Espanhol)
-- **Características**:
-  - Saudação personalizada baseada no horário do dia
-  - Data e hora formatadas de acordo com o idioma selecionado
-  - Mensagem amigável com emojis
+---
 
-### 2. Recurso de Saudação Dinâmica
+## Conceitos Fundamentais
 
-Um recurso que pode ser acessado via URI para obter saudações:
+### Model Context Protocol (MCP)
 
-- **URI Template**: `greeting://{name}/{language?}`
-- **Descrição**: Gerador dinâmico de saudações
-- **Parâmetros na URI**:
-  - `name`: Nome da pessoa
-  - `language` (opcional): Idioma (pt, en, ou es)
+O **Model Context Protocol (MCP)** é um padrão aberto projetado para facilitar a comunicação entre modelos de linguagem (LLMs) e serviços externos, conhecidos como "ferramentas". Ele cria um contrato claro para que os modelos possam descobrir e interagir com APIs de forma estruturada e segura.
 
-## Como Integrar
+Para saber mais, consulte a [documentação oficial do Model Context Protocol](https://microsoft.github.io/model-context-protocol/).
 
-### 1. Usando STDIO Transport (Linha de Comando)
+### Ferramentas (Tools)
 
-```typescript
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+No ecossistema MCP, uma **ferramenta** é uma função que o modelo pode invocar para realizar uma ação. Neste projeto, as ferramentas delegam a lógica para a API NestJS.
 
-// Criar e configurar o cliente
-const client = new Client({
-  name: "example-client",
-  version: "1.0.0"
-});
+-   **Ferramenta Implementada: `riachuelo_code_review`**
+    -   **Objetivo**: Envia um prompt (geralmente um trecho de código) para análise e recebe uma revisão como resposta.
+    -   **Endpoint da API**: `http://localhost:3000/chatgpt/completions`
 
-// Conectar via STDIO
-const transport = new StdioClientTransport({
-  command: "node",
-  args: ["index.js"]
-});
-await client.connect(transport);
+-   **Ferramenta Implementada: `riachuelo_code_generator`**
+    -   **Objetivo**: Gera código a partir de requisitos não-técnicos, seguindo os padrões "Riachuelo".
+    -   **Endpoint da API**: `http://localhost:3000/chatgpt/code-generation`
 
-// Chamar a ferramenta de saudação
-const result = await client.callTool({
-  name: "friendly_greeting",
-  arguments: {
-    name: "João",
-    language: "pt"
-  }
-});
+---
 
-console.log(result.content[0].text);
-```
+## Como Executar os Servidores
 
-### 2. Usando HTTP Transport (Web)
+Para interagir com o projeto, você precisará executar o servidor MCP e a API NestJS separadamente.
 
-```typescript
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+### 1. Executando o Servidor MCP
 
-// Criar e configurar o cliente
-const client = new Client({
-  name: "web-client",
-  version: "1.0.0"
-});
+O servidor MCP é responsável por expor as ferramentas `riachuelo_*`.
 
-// Conectar via HTTP
-const transport = new StreamableHTTPClientTransport(
-  new URL("http://localhost:3000/mcp")
-);
-await client.connect(transport);
+1.  Navegue até o diretório do servidor MCP:
+    ```bash
+    cd MCP-SERVER
+    ```
+2.  Instale as dependências (se for a primeira vez):
+    ```bash
+    npm install
+    ```
+3.  Inicie o servidor:
+    ```bash
+    node index.js
+    ```
+    O servidor começará a escutar por conexões via `stdio` e informará as ferramentas disponíveis.
 
-// Acessar o recurso de saudação
-const resource = await client.readResource({
-  uri: "greeting://Maria/pt"
-});
+### 2. Executando a API NestJS
 
-console.log(resource.contents[0].text);
-```
+A API NestJS é o backend que processa as solicitações das ferramentas.
 
-### 3. Usando MCP Inspector
+1.  Navegue até o diretório da API:
+    ```bash
+    cd nestjs-api
+    ```
+2.  Instale as dependências (se for a primeira vez):
+    ```bash
+    npm install
+    ```
+3.  Inicie a API em modo de desenvolvimento:
+    ```bash
+    npm run start:dev
+    ```
+    A API estará disponível em `http://localhost:3000`.
 
-1. Instale o MCP Inspector globalmente:
-   ```bash
-   npm install -g @modelcontextprotocol/inspector
-   ```
+### 3. Inspecionando o Servidor MCP
 
-2. Configure o arquivo `.mcp-inspector`:
-   ```json
-   {
-     "servers": {
-       "friendly-greeter": {
-         "command": "node",
-         "args": ["index.js"]
-       }
-     }
-   }
-   ```
+Para testar e interagir com o servidor MCP, você pode usar o **MCP Inspector**.
 
-2. Para instalar no VsCode abra o arquivo `mcp.json` via CTRL+P+>+mcp user configuration:
-  ```json
-      "friendly-greeter": {
-        "command": "node",
-        "args": [
-          "index.js"
-        ],
-        "transport": "stdio",
-        "cwd": "D:\\development\\projects\\my-mcp-test\\MCP-SERVER",
-        "type": "stdio"
-      }
-  ```
+1.  Com o servidor MCP (`node index.js`) em execução, abra um **novo terminal**.
+2.  Execute o MCP Inspector:
+    ```bash
+    npx @modelcontextprotocol/inspector
+    ```
+3.  Acesse a interface do Inspector no seu navegador (geralmente em **`http://localhost:6274`**) para interagir com as ferramentas `riachuelo_code_review` e `riachuelo_code_generator`.
 
-3. Execute o MCP Inspector:
-   ```bash
-   mcp-inspector
-   ```
+---
 
-3. Executando de outra forma
+## Documentação de Referência
 
-  ```bash
-  node index.js
-  npx @modelcontextprotocol/inspector
-  ```
-
-4. Acesse a interface web do Inspector em http://localhost:6274
-
-## Exemplos de Uso
-
-### 1. Chamada da Ferramenta
-
-```typescript
-// Exemplo de chamada em português
-const ptResult = await client.callTool({
-  name: "friendly_greeting",
-  arguments: {
-    name: "Maria",
-    language: "pt"
-  }
-});
-
-// Exemplo de chamada em inglês
-const enResult = await client.callTool({
-  name: "friendly_greeting",
-  arguments: {
-    name: "John",
-    language: "en"
-  }
-});
-
-// Exemplo de chamada em espanhol
-const esResult = await client.callTool({
-  name: "friendly_greeting",
-  arguments: {
-    name: "Carlos",
-    language: "es"
-  }
-});
-```
-
-### 2. Acesso ao Recurso
-
-```typescript
-// Acessar recurso em português
-const ptResource = await client.readResource({
-  uri: "greeting://Maria/pt"
-});
-
-// Acessar recurso em inglês
-const enResource = await client.readResource({
-  uri: "greeting://John/en"
-});
-
-// Acessar recurso em espanhol
-const esResource = await client.readResource({
-  uri: "greeting://Carlos/es"
-});
-```
-
-## Notas de Implementação
-
-- O servidor utiliza o Zod para validação de entrada
-- As saudações são contextuais ao horário do dia (bom dia/boa tarde/boa noite)
-- Suporte completo a internacionalização (i18n) para datas e mensagens
-- Implementação de acordo com as mais recentes especificações do MCP
+-   **Model Context Protocol (MCP)**: [Especificação e Documentação](https://microsoft.github.io/model-context-protocol/)
+-   **NestJS**: [Documentação Oficial](https://docs.nestjs.com/)
+-   **Axios (HTTP Client)**: [Documentação do Axios](https://axios-http.com/docs/intro)
